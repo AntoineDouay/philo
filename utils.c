@@ -6,89 +6,83 @@
 /*   By: adouay <adouay@student.42.fr>              +#+  +:+       +#+        */
 /*                                                +#+#+#+#+#+   +#+           */
 /*   Created: 2022/10/18 12:50:30 by adouay            #+#    #+#             */
-/*   Updated: 2022/10/19 21:30:44 by adouay           ###   ########.fr       */
+/*   Updated: 2022/10/21 19:41:49 by adouay           ###   ########.fr       */
 /*                                                                            */
 /* ************************************************************************** */
 
 #include "philo.h"
 
-int get_timestamp(t_data *data)
+int	get_timestamp(t_data *data)
 {
-	struct timeval time;
-	
+	struct timeval	time;
+
 	gettimeofday(&time, NULL);
-	return ((time.tv_sec * 1000 + time.tv_usec / 1000) - (data->start_time.tv_sec * 1000 + data->start_time.tv_usec / 1000));
+	return ((time.tv_sec * 1000 + time.tv_usec / 1000)
+		- (data->start_time.tv_sec * 1000 + data->start_time.tv_usec / 1000));
 }
 
-void    print(t_philo *philo, int type)
+void	print(t_philo *philo, int type)
 {
-    int time;
+	int	time;
 
-    time = get_timestamp(philo->data);
-    pthread_mutex_lock(&philo->data->print);
-    if (type == 1)
-        printf ("%i Philo %i has taken a fork\n", time, philo->id);
-    if (type == 2)
-        printf ("%i Philo %i is eating\n", time, philo->id);
-    if (type == 3)
-        printf ("%i Philo %i is sleeping\n", time, philo->id);
-    if (type == 4)
-        printf ("%i Philo %i died\n", time, philo->id);
-    pthread_mutex_unlock(&philo->data->print);
+	time = get_timestamp(philo->data);
+	pthread_mutex_lock(&philo->data->print);
+	if (!did_philo_is_stoped(philo))
+	{
+		if (type == 1)
+			printf ("%i  %i has taken a fork\n", time, philo->id);
+		if (type == 2)
+			printf ("%i  %i is eating\n", time, philo->id);
+		if (type == 3)
+			printf ("%i  %i is sleeping\n", time, philo->id);
+		if (type == 4)
+			printf ("%i  %i is thinking\n", time, philo->id);
+	}
+	if (type == 5)
+		printf ("%i  %i died\nlast meal was at %i\n", time,
+			philo->id, philo->last_meal);
+	pthread_mutex_unlock(&philo->data->print);
 }
 
-void    sleep_well(t_philo *philo, int time)
+int	check_int(char *argv[])
 {
-    int goal;
-    
-    goal = get_timestamp(philo->data) + time;
-    while(get_timestamp(philo->data) < goal)
-    {
-        if (did_philo_is_stoped(philo))
-            break ;
-        usleep(100);
-    } 
+	int	i;
+	int	j;
+
+	i = 1;
+	while (argv[i])
+	{
+		j = 0;
+		while (argv[i][j])
+		{
+			if (argv[i][j] >= '0' && argv[i][j] <= '9')
+				j++;
+			else
+				return (1);
+		}
+		i++;
+	}
+	return (0);
 }
 
-int check_int(char *argv[])
+int	check_args(int argc, char *argv[])
 {
-    int i;
-    int j;
-    
-    i = 1;
-    while (argv[i])
-    {
-        j = 0;
-        while (argv[i][j])
-        {
-            if (argv[i][j] >= '0' && argv[i][j] <= '9')
-                j++;
-            else
-                return (1);
-        }
-        i++;
-    }
-    return (0);
-}
+	long int	tmp;
+	int			i;
 
-int check_args(int argc, char *argv[])
-{
-    long int    tmp;
-    int i;
-    
-    if (argc != 5 && argc != 6)
-        return (1);
-    if (check_int(argv))
-        return (1);
-    i = 1;
-    while (argv[i])
-    {
-        tmp = ft_atoi(argv[i]);
-        if (tmp < INT_MIN || tmp > INT_MAX)
-            return (1);
-        i++;
-    }
-    return (0);
+	if (argc != 5 && argc != 6)
+		return (1);
+	if (check_int(argv))
+		return (1);
+	i = 1;
+	while (argv[i])
+	{
+		tmp = ft_atoi(argv[i]);
+		if (tmp < INT_MIN || tmp > INT_MAX)
+			return (1);
+		i++;
+	}
+	return (0);
 }
 
 long int	ft_atoi(const char *nptr)
